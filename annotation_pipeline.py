@@ -1,5 +1,6 @@
 import numpy as np
 import xml.etree.ElementTree as ET
+from pprint import pprint
 
 class GenericAnnotationConverter:
     """Convert any CVAT-style XML annotations to NPZ dynamically (all shapes)."""
@@ -62,7 +63,6 @@ class GenericAnnotationConverter:
         self.parse()
         self.save()
 
-
 class GenericAnnotationLoader:
     """Load NPZ annotations dynamically and inspect any shape type."""
 
@@ -82,12 +82,27 @@ class GenericAnnotationLoader:
             print(f"{key}: {len(value)} items")
 
     def preview(self, key, n=2):
+        """Pretty print first n items of a given annotation type."""
         if key not in self.data:
             print(f"❌ Key '{key}' not found.")
             return
+
         print(f"\nPreview of {key} (first {n} items):")
         for i, item in enumerate(self.data[key][:n]):
-            print(f"[{i}] {item}")
+            print(f"[{i}] {key}:")
+            # Handle numpy arrays (polygons, points, etc.)
+            if isinstance(item, np.ndarray):
+                if item.ndim == 1:  # 1D array
+                    print(f"  {item}")
+                else:  # 2D array, e.g., polygons
+                    for point in item:
+                        print(f"   x={point[0]:.2f}, y={point[1]:.2f}")
+            # Handle dictionaries (masks, skeletons)
+            elif isinstance(item, dict):
+                pprint(item, indent=4)
+            # Handle simple lists or strings (tags, cuboids, boxes)
+            else:
+                print(f"  {item}")
 
     def get(self, key):
         """Return full data of a specific annotation type."""
@@ -106,3 +121,4 @@ if __name__ == "__main__":
     loader.summary()
     loader.preview("polygon")
     loader.preview("mask")
+    loader.preview("box")
