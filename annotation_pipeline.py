@@ -51,11 +51,7 @@ class GenericAnnotationConverter:
             if len(value) == 0:
                 npz_dict[key] = np.array([], dtype=object)
             else:
-                # If first element is np.ndarray, store as object array
-                if isinstance(value[0], np.ndarray):
-                    npz_dict[key] = np.array(value, dtype=object)
-                else:
-                    npz_dict[key] = np.array(value, dtype=object)
+                npz_dict[key] = np.array(value, dtype=object)
         np.savez_compressed(self.save_path, **npz_dict)
         print(f"✅ Saved all annotations to {self.save_path}")
 
